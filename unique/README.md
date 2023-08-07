@@ -38,3 +38,21 @@ This runs a 3 node cluster for 30 seconds, and requests new IDs at a rate of
 is totally available even in the face of network partitions/interruptions.
 
 If you get a happy response, then you'll know you're done :)
+
+## Stuff I tried
+
+### Simple counter
+
+What if we naively have a counter variable in each node?
+
+```go
+    a := 0
+	n.Handle("generate", func(msg maelstrom.Message) error {
+        // ...
+		a++
+		return n.Reply(msg, body)
+    }
+```
+
+This obviously won't work... Every node is going to be counting from the same
+starting point, so there'll necessarily be overlap.
