@@ -3,7 +3,7 @@
 This first challenge corresponds to [echo](https://fly.io/dist-sys/1/) on the
 Glossip Glomers site.
 
-# Specification
+## Specification
 
 Our nodes will receive an `echo` message that looks as follows:
 
@@ -35,9 +35,9 @@ and with an `in_reply_to` field referencing the original `msg_id`:
 }
 ```
 
-# Testing
+## Testing
 
-## Prerequisites
+### Prerequisites
 
 Make sure you have `go` installed.
 
@@ -46,7 +46,7 @@ Make sure to install the
 for the `maelstrom` library. Afterwards, follow the [installation
 instructions](https://github.com/jepsen-io/maelstrom/blob/main/doc/01-getting-ready/index.md#installation).
 
-## Running echo
+### Running echo
 
 Compile the program by running `go install .`; it should appear in your
 `$GO_PATH` (in my case `~/go/bin/`).
