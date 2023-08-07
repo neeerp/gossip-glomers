@@ -41,7 +41,7 @@ If you get a happy response, then you'll know you're done :)
 
 ## Stuff I tried
 
-### Simple counter
+### [Failure] Simple counter
 
 What if we naively have a counter variable in each node?
 
@@ -49,6 +49,7 @@ What if we naively have a counter variable in each node?
     a := 0
 	n.Handle("generate", func(msg maelstrom.Message) error {
         // ...
+		body["id"] = a
 		a++
 		return n.Reply(msg, body)
     }
@@ -56,3 +57,22 @@ What if we naively have a counter variable in each node?
 
 This obviously won't work... Every node is going to be counting from the same
 starting point, so there'll necessarily be overlap.
+
+### [Success] Simple counter and Node ID
+
+Augmenting the previous implementation with a "unique" node ID does the trick!
+In our implementation, we randomly choose an ID between 0 and 1,000,000,000. In
+practice, it's definitely possible to get duplicates with this approach, so we'd
+probably want a better way to assign node IDs... however this suffices to make
+`maelstrom` pass!
+
+```go
+    a := 0
+	node_id := strconv.Itoa(rand.Intn(1e9))
+	n.Handle("generate", func(msg maelstrom.Message) error {
+        // ...
+		body["id"] = node_id + "-" + strconv.Itoa(a)
+		a++
+		return n.Reply(msg, body)
+    }
+```

@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
+	"strconv"
 
 	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )
@@ -10,6 +12,7 @@ import (
 func main() {
 	n := maelstrom.NewNode()
 
+	node_id := strconv.Itoa(rand.Intn(1e9))
 	a := 0
 	n.Handle("generate", func(msg maelstrom.Message) error {
 		var body map[string]any
@@ -19,7 +22,7 @@ func main() {
 		}
 
 		body["type"] = "generate_ok"
-		body["id"] = a
+		body["id"] = node_id + "-" + strconv.Itoa(a)
 		a++
 
 		return n.Reply(msg, body)
