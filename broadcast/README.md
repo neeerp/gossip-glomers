@@ -98,3 +98,16 @@ Values should propagate within seconds to all other nodes!
 ```sh
 ./maelstrom test -w broadcast --bin ~/go/bin/broadcast --node-count 5 --time-limit 20 --rate 10
 ```
+
+## Multi Node with network partitions
+
+### Specification
+
+Same as before... except now the network might go down, and every node should
+see every broadcast by the end despite that!
+
+### Testing
+
+```sh
+./maelstrom test -w broadcast --bin ~/go/bin/broadcast --node-count 5 --time-limit 20 --rate 10 --nemesis partition
+```

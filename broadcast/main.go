@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
+	// "sync"
 
 	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )
@@ -16,11 +18,15 @@ func contains(messages []float64, message float64) bool {
 	return false
 }
 
+type Retry struct {
+	node    string
+	message float64
+}
+
 func main() {
 	n := maelstrom.NewNode()
 
 	var messages []float64
-
 	var topology map[string]any
 
 	n.Handle("broadcast", func(msg maelstrom.Message) error {
@@ -41,11 +47,37 @@ func main() {
 
 		// Propagate to neighbours
 		messages = append(messages, message)
+		retry := make(map[string]bool)
 		for _, node := range topology[n.ID()].([]any) {
-			n.Send(node.(string), body)
+			ctx, cancel := context.WithTimeout(context.Background(), 100)
+			_, err := n.SyncRPC(ctx, node.(string), body)
+			cancel()
+
+			if err != nil {
+				retry[node.(string)] = true
+			}
 		}
 
-		return n.Reply(msg, response)
+		n.Reply(msg, response)
+
+		// Keep trying
+		for {
+			if len(retry) == 0 {
+				break
+			}
+
+			for node := range retry {
+				ctx, cancel := context.WithTimeout(context.Background(), 100)
+				_, err := n.SyncRPC(ctx, node, body)
+				cancel()
+
+				if err == nil {
+					delete(retry, node)
+				}
+			}
+		}
+
+		return nil
 	})
 
 	n.Handle("read", func(msg maelstrom.Message) error {
